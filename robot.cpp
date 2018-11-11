@@ -45,7 +45,6 @@ int main()
                 {
                     --dust;
                     room[i][--j]=x;
-                    if(room[i-1][j]=='0') dir=up;
                     for(int k=1;k<=n;k++)
                     {
                         for(int l=1;l<=m;l++)
@@ -54,8 +53,20 @@ int main()
                     }
                     cout<<dust<<endl;
                 }
-                else if(room[i][j-1]=='1' || room[i][j-1]=='R') dir=up;
-                else room[i][--j]=x;
+                else if((room[i-1][j]!='0' && room[i][j-1]=='1') || (room[i-1][j]=='1' && room[i][j-1]) || (room[i][j-1]!='0' && room[i+1][j]=='0')) dir=down;
+                else if(room[i][j-1]=='1' || (room[i][j-1]=='1' && room[i+1][j]=='1') || (room[i][j-1]!='0' && room[i-1][j]=='0') || room[i][j-1]=='R') dir=up;
+                else if((room[i-1][j]=='1' && room[i][j-1]=='1' && room[i+1][j]=='1') || (room[i][j-1]!='0' && room[i][j+1]=='0')) dir=right;
+                else
+                {
+                    room[i][--j]=x;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                }
                 break;
             }
         case up:
@@ -74,8 +85,20 @@ int main()
                     }
                     cout<<dust<<endl;
                 }
-                else if(room[i-1][j]=='1' || room[i-1][j]=='R') dir=right;
-                else room[--i][j]=x;
+                else if((room[i-1][j]=='1' && room[i][j+1]=='1') || (room[i-1][j]!='0' && room[i][j-1]=='0')) dir=left;
+                else if(room[i-1][j]=='1' || (room[i-1][j]=='1' && room[i][j-1]=='1') || (room[i-1][j]!='0' && room[i][j+1]=='0') || room[i-1][j]=='R') dir=right;
+                else if((room[i-1][j]=='1' && room[i][j+1]=='1' && room[i][j-1]=='1') || (room[i-1][j]!='0' && room[i+1][j]=='0')) dir=down;
+                else
+                {
+                    room[--i][j]=x;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                }
                 break;
             }
         case right:
@@ -86,7 +109,6 @@ int main()
                 {
                     --dust;
                     room[i][++j]=x;
-                    if(room[i-1][j]=='0') dir=up;
                     for(int k=1;k<=n;k++)
                     {
                         for(int l=1;l<=m;l++)
@@ -95,8 +117,20 @@ int main()
                     }
                     cout<<dust<<endl;
                 }
-                else if(room[i][j+1]=='1' || room[i][j+1]=='R') dir=down;
-                else room[i][++j]=x;
+                else if((room[i][j+1]=='1' && room[i+1][j]=='1') || (room[i][j+1]!='0' && room[i-1][j]=='0')) dir=up;
+                else if(room[i][j+1]=='1' || (room[i][j+1]=='1' && room[i-1][j]=='1') || (room[i][j+1]!='0' && room[i+1][j]=='0') || room[i][j+1]=='R') dir=down;
+                else if((room[i][j+1]=='1' && room[i+1][j]=='1' && room[i-1][j]=='1') || (room[i][j+1]!='0' && room[i][j-1]=='0')) dir=left;
+                else
+                {
+                    room[i][++j]=x;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                }
                 break;
             }
         case down:
@@ -107,7 +141,6 @@ int main()
                 {
                     --dust;
                     room[++i][j]=x;
-                    if(room[i][j+1]=='0') dir=right;
                     for(int k=1;k<=n;k++)
                     {
                         for(int l=1;l<=m;l++)
@@ -116,8 +149,20 @@ int main()
                     }
                     cout<<dust<<endl;
                 }
-                else if(room[i+1][j]=='1' || room[i+1][j]=='R') dir=left;
-                else room[++i][j]=x;
+                else if((room[i+1][j]=='1' && room[i][j-1]=='1') || (room[i+1][j]!='0' && room[i][j+1]=='0')) dir=right;
+                else if(room[i+1][j]=='1' || (room[i+1][j]=='1' && room[i][j+1]=='1') || (room[i+1][j]!='0' && room[i][j-1]=='0') || room[i+1][j]=='R') dir=left;
+                else if((room[i+1][j]=='1' && room[i][j-1]=='1' && room[i][j+1]=='1') || (room[i+1][j]!='0' && room[i-1][j]=='0')) dir=up;
+                else
+                {
+                    room[++i][j]=x;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                }
                 break;
             }
         }
@@ -147,10 +192,18 @@ R:bed
 
 11111111111
 10001110011
-10001110001
-100011R0011
-10001111011
-10000000001
+11001110011
+110011R0011
+11001111011
+10000000011
 11111111111
 
+1111111111
+1000100001
+1000100001
+1000100001
+1011111101
+1000000001
+1111R11111
 */
+
