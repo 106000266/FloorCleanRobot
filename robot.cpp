@@ -7,10 +7,11 @@ using namespace std;
 char room[1000][1000];
 int main()
 {
-    int n,m;
-    int p_row,p_col,dust=0;
-    char x='*',y='-';
-    cin>>n>>m;
+    int n,m,battery;
+    int p_row,p_col,dust=0,step=0,en=0,cen=0,pen=0;
+    char x='*',y='-',z='P';
+    cin>>n>>m>>battery;
+    int elec=battery;
     for(int i=0;i<=n+1;i++)
     {
         for(int j=0;j<=m+1;j++)
@@ -30,35 +31,668 @@ int main()
                 dust++;
         }
     }
-    cout<<dust<<endl;
-    int dir=left;
+    cout<<dust<<" "<<elec<<endl;
+    int dir=left,mem=0;
     int i=p_row,j=p_col;
     while(dust!=0)
     {
+        if(elec!=battery/2 && !en && !cen)
+        {
+            switch(dir)
+            {
+            case left:
+                {
+                    room[p_row][p_col]='R';
+                    room[i][j]=y;
+                    if(room[i][j-1]=='0')
+                    {
+                        --dust;
+                        room[i][--j]=x;
+                        elec--;
+                        for(int k=1;k<=n;k++)
+                        {
+                            for(int l=1;l<=m;l++)
+                                cout<<room[k][l];
+                            cout<<endl;
+                        }
+                        cout<<dust<<endl;
+                    }
+                    else if((room[i-1][j]!='0' && room[i][j-1]=='1') || (room[i-1][j]=='1' && room[i][j-1]) || (room[i][j-1]!='0' && room[i+1][j]=='0')) dir=down;
+                    else if(room[i][j-1]=='1' || (room[i][j-1]=='1' && room[i+1][j]=='1') || (room[i][j-1]!='0' && room[i-1][j]=='0') || room[i][j-1]=='R') dir=up;
+                    else if((room[i-1][j]=='1' && room[i][j-1]=='1' && room[i+1][j]=='1') || (room[i][j-1]!='0' && room[i][j+1]=='0')) dir=right;
+                    else
+                    {
+                        room[i][--j]=x;
+                        elec--;
+                        for(int k=1;k<=n;k++)
+                        {
+                            for(int l=1;l<=m;l++)
+                                cout<<room[k][l];
+                            cout<<endl;
+                        }
+                        cout<<endl;
+                    }
+                    cout<<elec<<endl;
+                    break;
+                }
+            case up:
+                {
+                    room[p_row][p_col]='R';
+                    room[i][j]=y;
+                    if(room[i-1][j]=='0')
+                    {
+                        --dust;
+                        room[--i][j]=x;
+                        elec--;
+                        for(int k=1;k<=n;k++)
+                        {
+                            for(int l=1;l<=m;l++)
+                                cout<<room[k][l];
+                            cout<<endl;
+                        }
+                        cout<<dust<<endl;
+                    }
+                    else if((room[i-1][j]=='1' && room[i][j+1]=='1') || (room[i-1][j]!='0' && room[i][j-1]=='0')) dir=left;
+                    else if(room[i-1][j]=='1' || (room[i-1][j]=='1' && room[i][j-1]=='1') || (room[i-1][j]!='0' && room[i][j+1]=='0') || room[i-1][j]=='R') dir=right;
+                    else if((room[i-1][j]=='1' && room[i][j+1]=='1' && room[i][j-1]=='1') || (room[i-1][j]!='0' && room[i+1][j]=='0')) dir=down;
+                    else
+                    {
+                        room[--i][j]=x;
+                        elec--;
+                        for(int k=1;k<=n;k++)
+                        {
+                            for(int l=1;l<=m;l++)
+                                cout<<room[k][l];
+                            cout<<endl;
+                        }
+                        cout<<endl;
+                    }
+                    cout<<elec<<endl;
+                    break;
+                }
+            case right:
+                {
+                    room[p_row][p_col]='R';
+                    room[i][j]=y;
+                    if(room[i][j+1]=='0')
+                    {
+                        --dust;
+                        room[i][++j]=x;
+                        elec--;
+                        for(int k=1;k<=n;k++)
+                        {
+                            for(int l=1;l<=m;l++)
+                                cout<<room[k][l];
+                            cout<<endl;
+                        }
+                        cout<<dust<<endl;
+                    }
+                    else if((room[i][j+1]=='1' && room[i+1][j]=='1') || (room[i][j+1]!='0' && room[i-1][j]=='0')) dir=up;
+                    else if(room[i][j+1]=='1' || (room[i][j+1]=='1' && room[i-1][j]=='1') || (room[i][j+1]!='0' && room[i+1][j]=='0') || room[i][j+1]=='R') dir=down;
+                    else if((room[i][j+1]=='1' && room[i+1][j]=='1' && room[i-1][j]=='1') || (room[i][j+1]!='0' && room[i][j-1]=='0')) dir=left;
+                    else
+                    {
+                        room[i][++j]=x;
+                        elec--;
+                        for(int k=1;k<=n;k++)
+                        {
+                            for(int l=1;l<=m;l++)
+                                cout<<room[k][l];
+                            cout<<endl;
+                        }
+                        cout<<endl;
+                    }
+                    cout<<elec<<endl;
+                    break;
+                }
+            case down:
+                {
+                    room[p_row][p_col]='R';
+                    room[i][j]=y;
+                    if(room[i+1][j]=='0')
+                    {
+                        --dust;
+                        room[++i][j]=x;
+                        elec--;
+                        for(int k=1;k<=n;k++)
+                        {
+                            for(int l=1;l<=m;l++)
+                                cout<<room[k][l];
+                            cout<<endl;
+                        }
+                        cout<<dust<<endl;
+                    }
+                    else if((room[i+1][j]=='1' && room[i][j-1]=='1') || (room[i+1][j]!='0' && room[i][j+1]=='0')) dir=right;
+                    else if(room[i+1][j]=='1' || (room[i+1][j]=='1' && room[i][j+1]=='1') || (room[i+1][j]!='0' && room[i][j-1]=='0') || room[i+1][j]=='R') dir=left;
+                    else if((room[i+1][j]=='1' && room[i][j-1]=='1' && room[i][j+1]=='1') || (room[i+1][j]!='0' && room[i-1][j]=='0')) dir=up;
+                    else
+                    {
+                        room[++i][j]=x;
+                        elec--;
+                        for(int k=1;k<=n;k++)
+                        {
+                            for(int l=1;l<=m;l++)
+                                cout<<room[k][l];
+                            cout<<endl;
+                        }
+                        cout<<endl;
+                    }
+                    cout<<elec<<endl;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            if(elec==battery/2)
+            {
+                mem=dir;
+                switch(dir)
+                {
+                    case left:
+                    {
+                        if(room[i+1][j]=='R') dir=down;
+                        else if(room[i-1][j]=='R') dir=up;
+                        else dir=right;
+                        break;
+                    }
+                    case up:
+                    {
+                        if(room[i][j+1]=='R') dir=right;
+                        else if(room[i][j-1]=='R') dir=left;
+                        else dir=down;
+                        break;
+                    }
+                    case right:
+                    {
+                        if(room[i+1][j]=='R') dir=down;
+                        else if(room[i-1][j]=='R') dir=up;
+                        else dir=left;
+                        break;
+                    }
+                    case down:
+                    {
+                        if(room[i][j+1]=='R') dir=right;
+                        else if(room[i][j-1]=='R') dir=left;
+                        else dir=up;
+                        break;
+                    }
+                }
+            }
+            if(step==0) cen=0;
+            if((i!=p_row || j!=p_col) && elec!=0)
+            {
+                en=1,cen=1;
+                switch(dir)
+                {
+                case left:
+                    {
+                        if(room[i+1][j]=='1' && room[i-1][j]=='1' && room[i][j-1]!='1')
+                        {
+                            room[i][--j]=x;
+                            room[i][j+1]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i+1][j]!='1') dir=down;
+                            else if(room[i-1][j]!='1') dir=up;
+                        }
+                        else if(room[i+1][j]=='1' && room[i][j-1]!='1')
+                        {
+                            room[i][--j]=x;
+                            room[i][j+1]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i+1][j]!='1') dir=down;
+                        }
+                        else if(room[i-1][j]=='1' && room[i][j-1]!='1')
+                        {
+                            room[i][--j]=x;
+                            room[i][j+1]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i-1][j]!='1') dir=up;
+                        }
+                        else if(room[i+1][j]!='1' && room[i-1][j]!='1' && room[i][j-1]!='1')
+                        {
+                            room[i][--j]=x;
+                            room[i][j+1]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                        }
+                        if(room[i][j-1]=='1' || room[i-1][j]==z || room[i+1][j]=='R') dir=down;
+                        if((room[i][j-1]=='1' && room[i+1][j]=='1') || room[i-1][j]=='R') dir=up;
+                        if(room[i][j-1]=='R' || room[i][j+1]=='R' || room[i-1][j]=='R' || room[i+1][j]=='R') pen=1;
+                        cout<<elec<<endl;
+                        break;
+                    }
+                case up:
+                    {
+                        if(room[i][j+1]=='1' && room[i][j-1]=='1' && room[i-1][j]!='1')
+                        {
+                            room[--i][j]=x;
+                            room[i+1][j]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i][j+1]!='1') dir=right;
+                            else if(room[i][j-1]!='1') dir=left;
+                        }
+                        else if(room[i][j+1]=='1' && room[i-1][j]!='1')
+                        {
+                            room[--i][j]=x;
+                            room[i+1][j]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i][j+1]!='1') dir=right;
+                        }
+                        else if(room[i][j-1]=='1' && room[i-1][j]!='1')
+                        {
+                            room[--i][j]=x;
+                            room[i+1][j]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i][j-1]!='1') dir=left;
+                        }
+                        else if(room[i-1][j]!='1' && room[i][j+1]!='1' && room[i][j-1]!='1')
+                        {
+                            room[--i][j]=x;
+                            room[i+1][j]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                        }
+                        if(room[i-1][j]=='1' || room[i][j-1]=='R') dir=left;
+                        if((room[i-1][j]=='1' && room[i][j-1]=='1') || room[i][j+1]=='R') dir=right;
+                        if(room[i][j-1]=='R' || room[i][j+1]=='R') pen=1;
+                        cout<<elec<<endl;
+                        break;
+                    }
+                case right:
+                    {
+                        if(room[i+1][j]=='1' && room[i-1][j]=='1' && room[i][j+1]!='1')
+                        {
+                            room[i][++j]=x;
+                            room[i][j-1]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i+1][j]!='1')dir=down;
+                            else if(room[i-1][j]!='1') dir=up;
+                        }
+                        else if(room[i+1][j]=='1' && room[i][j+1]!='1')
+                        {
+                            room[i][++j]=x;
+                            room[i][j-1]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i+1][j]!='1')dir=down;
+                        }
+                        else if(room[i-1][j]=='1'&& room[i][j+1]!='1')
+                        {
+                            room[i][++j]=x;
+                            room[i][j-1]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i-1][j]!='1')dir=up;
+                        }
+                        else if(room[i+1][j]!='1' && room[i][j+1]!='1' && room[i-1][j]!='1')
+                        {
+                            room[i][++j]=x;
+                            room[i][j-1]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                        }
+                        if(room[i][j+1]=='1' || room[i-1][j]=='R') dir=up;
+                        if((room[i][j+1]=='1' && room[i-1][j]=='1') || room[i+1][j]=='R' || room[i-1][j]==z) dir=down;
+                        if(room[i][j-1]=='R' || room[i][j+1]=='R' || room[i-1][j]=='R' || room[i+1][j]=='R') pen=1;
+                        cout<<elec<<endl;
+                        break;
+                    }
+                case down:
+                    {
+                        if(room[i][j+1]=='1' && room[i][j-1]=='1' && room[i+1][j]!='1')
+                        {
+                            room[++i][j]=x;
+                            room[i-1][j]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i][j+1]!='1')dir=right;
+                            else if(room[i][j-1]!='1') dir=left;
+                        }
+                        if(room[i][j+1]=='1' && room[i+1][j]!='1')
+                        {
+                            room[++i][j]=x;
+                            room[i-1][j]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i][j+1]!='1')dir=right;
+                        }
+                        else if(room[i][j-1]=='1' && room[i+1][j]!='1')
+                        {
+                            room[++i][j]=x;
+                            room[i-1][j]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                            if(room[i][j-1]!='1')dir=left;
+                        }
+                        else if(room[i+1][j]!='1' && room[i][j+1]!='1' && room[i][j-1]!='1')
+                        {
+                            room[++i][j]=x;
+                            room[i-1][j]=z;
+                            elec--;
+                            step++;
+                            for(int k=1;k<=n;k++)
+                            {
+                                for(int l=1;l<=m;l++)
+                                    cout<<room[k][l];
+                                cout<<endl;
+                            }
+                            cout<<endl;
+                        }
+                        if(room[i+1][j]=='1' || room[i][j+1]=='R') dir=right;
+                        if((room[i][j+1]=='1' && room[i+1][j]=='1') || room[i][j-1]=='R') dir=left;
+                        if(room[i][j-1]=='R' || room[i][j+1]=='R' || room[i-1][j]=='R' || room[i+1][j]=='R') pen=1;
+                        cout<<elec<<endl;
+                        break;
+                    }
+                }
+            }
+            else if(pen)
+            {
+                en=0;
+                elec=battery;
+                dir=left;
+                while(step)
+                {
+                    switch(dir)
+                    {
+                    case left:
+                        {
+                            if(room[i][j-1]!=z)
+                            {
+                                if(room[i][j+1]==z) dir=right;
+                                else if(room[i+1][j]==z) dir=down;
+                                else if(room[i-1][j]==z) dir=up;
+                            }
+                            else if(room[i][j-1]==z)
+                            {
+                                room[i][--j]=x;
+                                room[p_row][p_col]='R';
+                                room[i][j+1]=y;
+                                elec--;
+                                step--;
+                                for(int k=1;k<=n;k++)
+                                {
+                                    for(int l=1;l<=m;l++)
+                                        cout<<room[k][l];
+                                    cout<<endl;
+                                }
+                                cout<<endl;
+                            }
+                            cout<<elec<<endl;
+                            break;
+                        }
+                    case up:
+                        {
+                            if(room[i-1][j]!=z)
+                            {
+                                if(room[i][j+1]==z) dir=right;
+                                else if(room[i+1][j]==z) dir=down;
+                                else if(room[i][j-1]==z) dir=left;
+                            }
+                            else if(room[i-1][j]==z)
+                            {
+                                room[--i][j]=x;
+                                room[p_row][p_col]='R';
+                                room[i+1][j]=y;
+                                elec--;
+                                step--;
+                                for(int k=1;k<=n;k++)
+                                {
+                                    for(int l=1;l<=m;l++)
+                                        cout<<room[k][l];
+                                    cout<<endl;
+                                }
+                                cout<<endl;
+                            }
+                            cout<<elec<<endl;
+                            break;
+                        }
+                    case right:
+                        {
+                            if(room[i][j+1]!=z)
+                            {
+                                if(room[i-1][j]==z) dir=up;
+                                else if(room[i+1][j]==z) dir=down;
+                                else if(room[i][j-1]==z) dir=left;
+                            }
+                            else if(room[i][j+1]==z)
+                            {
+                                room[i][++j]=x;
+                                room[p_row][p_col]='R';
+                                room[i][j-1]=y;
+                                elec--;
+                                step--;
+                                for(int k=1;k<=n;k++)
+                                {
+                                    for(int l=1;l<=m;l++)
+                                        cout<<room[k][l];
+                                    cout<<endl;
+                                }
+                                cout<<endl;
+                            }
+                            cout<<elec<<endl;
+                            break;
+                        }
+                    case down:
+                        {
+                            if(room[i+1][j]!=z)
+                            {
+                                if(room[i-1][j]==z) dir=up;
+                                else if(room[i][j+1]==z) dir=right;
+                                else if(room[i][j-1]==z) dir=left;
+                            }
+                            else if(room[i+1][j]==z)
+                            {
+                                room[++i][j]=x;
+                                room[p_row][p_col]='R';
+                                room[i-1][j]=y;
+                                elec--;
+                                step--;
+                                for(int k=1;k<=n;k++)
+                                {
+                                    for(int l=1;l<=m;l++)
+                                        cout<<room[k][l];
+                                    cout<<endl;
+                                }
+                                cout<<endl;
+                            }
+                            cout<<elec<<endl;
+                            break;
+                        }
+                    }
+                    if(room[i][j-1]=='0')
+                    {
+                        cen=0,pen=0;
+                        dir=left;
+                        break;
+                    }
+                    if(room[i+1][j]=='0')
+                    {
+                        cen=0,pen=0;
+                        dir=down;
+                        break;
+                    }
+                    if(room[i-1][j]=='0')
+                    {
+                        cen=0,pen=0;
+                        dir=up;
+                        break;
+                    }
+                    if(room[i][j+1]=='0')
+                    {
+                        cen=0,pen=0;
+                        dir=right;
+                        break;
+                    }
+                }
+                cen=0,pen=0;
+                dir=mem;
+            }
+        }
+    }
+    while((i!=p_row || j!=p_col) && elec!=0)
+    {
         switch(dir)
         {
-        case left:
+            case left:
             {
-                room[p_row][p_col]='R';
-                room[i][j]=y;
-                if(room[i][j-1]=='0')
-                {
-                    --dust;
-                    room[i][--j]=x;
-                    for(int k=1;k<=n;k++)
-                    {
-                        for(int l=1;l<=m;l++)
-                            cout<<room[k][l];
-                        cout<<endl;
-                    }
-                    cout<<dust<<endl;
-                }
-                else if((room[i-1][j]!='0' && room[i][j-1]=='1') || (room[i-1][j]=='1' && room[i][j-1]) || (room[i][j-1]!='0' && room[i+1][j]=='0')) dir=down;
-                else if(room[i][j-1]=='1' || (room[i][j-1]=='1' && room[i+1][j]=='1') || (room[i][j-1]!='0' && room[i-1][j]=='0') || room[i][j-1]=='R') dir=up;
-                else if((room[i-1][j]=='1' && room[i][j-1]=='1' && room[i+1][j]=='1') || (room[i][j-1]!='0' && room[i][j+1]=='0')) dir=right;
-                else
+                if(room[i+1][j]=='1' && room[i-1][j]=='1' && room[i][j-1]!='1')
                 {
                     room[i][--j]=x;
+                    elec--;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                    if(room[i+1][j]!='1') dir=down;
+                    else if(room[i-1][j]!='1') dir=up;
+                }
+                else if(room[i+1][j]=='1' && room[i][j-1]!='1')
+                {
+                    room[i][--j]=x;
+                    elec--;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                    if(room[i+1][j]!='1') dir=down;
+                }
+                else if(room[i-1][j]=='1' && room[i][j-1]!='1')
+                {
+                    room[i][--j]=x;
+                    elec--;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                    if(room[i-1][j]!='1') dir=up;
+                }
+                else if(room[i+1][j]!='1' && room[i-1][j]!='1' && room[i][j-1]!='1')
+                {
+                    room[i][--j]=x;
+                    elec--;
                     for(int k=1;k<=n;k++)
                     {
                         for(int l=1;l<=m;l++)
@@ -67,30 +701,58 @@ int main()
                     }
                     cout<<endl;
                 }
+                if((room[i+1][j]==x && room[i-1][j]!=x) || room[i][j-1]=='1' || room[i-1][j]=='R') dir=up;
+                if((room[i+1][j]!=x && room[i-1][j]==x) || (room[i][j-1]=='1' && room[i-1][j]=='1') ||  room[i+1][j]=='R') dir=down;
+                if(room[i-1][j]=='R' || room[i+1][j]=='R') pen=1;
+                cout<<elec<<endl;
                 break;
             }
-        case up:
+            case up:
             {
-                room[p_row][p_col]='R';
-                room[i][j]=y;
-                if(room[i-1][j]=='0')
+                if(room[i][j+1]=='1' && room[i][j-1]=='1' && room[i-1][j]!='1')
                 {
-                    --dust;
                     room[--i][j]=x;
+                    elec--;
                     for(int k=1;k<=n;k++)
                     {
                         for(int l=1;l<=m;l++)
                             cout<<room[k][l];
                         cout<<endl;
                     }
-                    cout<<dust<<endl;
+                    cout<<endl;
+                    if(room[i][j+1]!='1') dir=right;
+                    else if(room[i][j-1]!='1') dir=left;
                 }
-                else if((room[i-1][j]=='1' && room[i][j+1]=='1') || (room[i-1][j]!='0' && room[i][j-1]=='0')) dir=left;
-                else if(room[i-1][j]=='1' || (room[i-1][j]=='1' && room[i][j-1]=='1') || (room[i-1][j]!='0' && room[i][j+1]=='0') || room[i-1][j]=='R') dir=right;
-                else if((room[i-1][j]=='1' && room[i][j+1]=='1' && room[i][j-1]=='1') || (room[i-1][j]!='0' && room[i+1][j]=='0')) dir=down;
-                else
+                else if(room[i][j+1]=='1' && room[i-1][j]!='1')
                 {
                     room[--i][j]=x;
+                    elec--;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                    if(room[i][j+1]!='1') dir=right;
+                }
+                else if(room[i][j-1]=='1' && room[i-1][j]!='1')
+                {
+                    room[--i][j]=x;
+                    elec--;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                    if(room[i][j-1]!='1') dir=left;
+                }
+                else if(room[i-1][j]!='1' && room[i][j+1]!='1' && room[i][j-1]!='1')
+                {
+                    room[--i][j]=x;
+                    elec--;
                     for(int k=1;k<=n;k++)
                     {
                         for(int l=1;l<=m;l++)
@@ -99,30 +761,58 @@ int main()
                     }
                     cout<<endl;
                 }
+                if((room[i][j-1]==x && room[i][j+1]!=x) || room[i-1][j]=='1' || room[i][j+1]=='R') dir=right;
+                if((room[i][j-1]!=x && room[i][j+1]==x) || (room[i-1][j]=='1' && room[i][j+1]=='1') || room[i][j-1]=='R') dir=left;
+                if(room[i][j-1]=='R' || room[i][j+1]=='R') pen=1;
+                cout<<elec<<endl;
                 break;
             }
-        case right:
+            case right:
             {
-                room[p_row][p_col]='R';
-                room[i][j]=y;
-                if(room[i][j+1]=='0')
+                if(room[i+1][j]=='1' && room[i-1][j]=='1' && room[i][j+1]!='1')
                 {
-                    --dust;
                     room[i][++j]=x;
+                    elec--;
                     for(int k=1;k<=n;k++)
                     {
                         for(int l=1;l<=m;l++)
                             cout<<room[k][l];
                         cout<<endl;
                     }
-                    cout<<dust<<endl;
+                    cout<<endl;
+                    if(room[i+1][j]!='1')dir=down;
+                    else if(room[i-1][j]!='1') dir=up;
                 }
-                else if((room[i][j+1]=='1' && room[i+1][j]=='1') || (room[i][j+1]!='0' && room[i-1][j]=='0')) dir=up;
-                else if(room[i][j+1]=='1' || (room[i][j+1]=='1' && room[i-1][j]=='1') || (room[i][j+1]!='0' && room[i+1][j]=='0') || room[i][j+1]=='R') dir=down;
-                else if((room[i][j+1]=='1' && room[i+1][j]=='1' && room[i-1][j]=='1') || (room[i][j+1]!='0' && room[i][j-1]=='0')) dir=left;
-                else
+                else if(room[i+1][j]=='1' && room[i][j+1]!='1')
                 {
                     room[i][++j]=x;
+                    elec--;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                    if(room[i+1][j]!='1')dir=down;
+                }
+                else if(room[i-1][j]=='1'&& room[i][j+1]!='1')
+                {
+                    room[i][++j]=x;
+                    elec--;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                    if(room[i-1][j]!='1')dir=up;
+                }
+                else if(room[i+1][j]!='1' && room[i][j+1]!='1' && room[i-1][j]!='1')
+                {
+                    room[i][++j]=x;
+                    elec--;
                     for(int k=1;k<=n;k++)
                     {
                         for(int l=1;l<=m;l++)
@@ -131,30 +821,58 @@ int main()
                     }
                     cout<<endl;
                 }
+                if((room[i+1][j]!=x && room[i-1][j]==x) || room[i][j+1]=='1' || room[i+1][j]=='R') dir=down;
+                if((room[i+1][j]==x && room[i-1][j]!=x) || (room[i][j+1]=='1' && room[i+1][j]=='1') || room[i-1][j]=='R') dir=up;
+                if(room[i-1][j]=='R' || room[i+1][j]=='R') pen=1;
+                cout<<elec<<endl;
                 break;
             }
-        case down:
+            case down:
             {
-                room[p_row][p_col]='R';
-                room[i][j]=y;
-                if(room[i+1][j]=='0')
+                if(room[i][j+1]=='1' && room[i][j-1]=='1' && room[i+1][j]!='1')
                 {
-                    --dust;
                     room[++i][j]=x;
+                    elec--;
                     for(int k=1;k<=n;k++)
                     {
                         for(int l=1;l<=m;l++)
                             cout<<room[k][l];
                         cout<<endl;
                     }
-                    cout<<dust<<endl;
+                    cout<<endl;
+                    if(room[i][j+1]!='1')dir=right;
+                    else if(room[i][j-1]!='1') dir=left;
                 }
-                else if((room[i+1][j]=='1' && room[i][j-1]=='1') || (room[i+1][j]!='0' && room[i][j+1]=='0')) dir=right;
-                else if(room[i+1][j]=='1' || (room[i+1][j]=='1' && room[i][j+1]=='1') || (room[i+1][j]!='0' && room[i][j-1]=='0') || room[i+1][j]=='R') dir=left;
-                else if((room[i+1][j]=='1' && room[i][j-1]=='1' && room[i][j+1]=='1') || (room[i+1][j]!='0' && room[i-1][j]=='0')) dir=up;
-                else
+                if(room[i][j+1]=='1' && room[i+1][j]!='1')
                 {
                     room[++i][j]=x;
+                    elec--;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                    if(room[i][j+1]!='1')dir=right;
+                }
+                else if(room[i][j-1]=='1' && room[i+1][j]!='1')
+                {
+                    room[++i][j]=x;
+                    elec--;
+                    for(int k=1;k<=n;k++)
+                    {
+                        for(int l=1;l<=m;l++)
+                            cout<<room[k][l];
+                        cout<<endl;
+                    }
+                    cout<<endl;
+                    if(room[i][j-1]!='1')dir=left;
+                }
+                else if(room[i+1][j]!='1' && room[i][j+1]!='1' && room[i][j-1]!='1')
+                {
+                    room[++i][j]=x;
+                    elec--;
                     for(int k=1;k<=n;k++)
                     {
                         for(int l=1;l<=m;l++)
@@ -163,15 +881,21 @@ int main()
                     }
                     cout<<endl;
                 }
+                if((room[i][j-1]!=x && room[i][j+1]==x) || room[i+1][j]=='1' || room[i][j-1]=='R') dir=left;
+                if((room[i][j-1]==x && room[i][j+1]!=x) || (room[i+1][j]=='1' && room[i][j-1]=='1') || room[i][j+1]=='R') dir=right;
+                if(room[i][j-1]=='R' || room[i][j+1]=='R') pen=1;
+                cout<<elec<<endl;
                 break;
             }
         }
     }
+    if(elec==0) cout<<"FAILED"<<endl;
+    else if(i==p_row && j==p_col) cout<<"PASS"<<endl;
     return 0;
 }
 
 /*
-Main Question: How to detect shortcut to R & all foods are eaten?6
+Main Question: How to detect shortcut to R?
 N*M  Energy
 7*11 30
 lost_energy++ when step++
