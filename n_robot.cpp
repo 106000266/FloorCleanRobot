@@ -1,42 +1,198 @@
 #include <iostream>
+#include <fstream>
+#include <queue>
+#include <string.h>
 #define left 1
 #define up 2
 #define right 3
 #define down 4
 using namespace std;
-char room[1000][1000];
-int row[1000],column[1000];
-int main()
+char room[2000][2000];
+int row[]={-1,0,0,1};
+int col[]={0,-1,1,0};
+int pos_x[1000000]={0};
+int pos_y[1000000]={0};
+int step_x[1000000]={0};
+int step_y[1000000]={0};
+int arr[2][1000000]={0};
+int solution[2][1000000]={0};
+int dis[1000000]={0};
+struct Node
 {
+    int x,y,dist;
+};
+bool isValid(int **mat,bool **visited,int row,int col,int n,int m)
+{
+	return (row>=1) && (row<n+1) && (col>=1) && (col<m+1) && !mat[row][col] && !visited[row][col];
+}
+int BFS1(int **mat,int i,int j,int x,int y,int n,int m)
+{
+	bool **visited;
+	visited=new bool*[n];
+	for(int a=0;a<n;a++)
+        visited[a]=new bool[m];
+	for(int a=0;a<n;a++)
+    {
+        for(int b=0;b<m;b++)
+            visited[a][b]=false;
+    }
+    queue<Node> q;
+    visited[i][j]=true;
+    q.push({i,j,0});
+    int mini=INT_MAX;
+    while (!q.empty())
+	{
+	    Node node=q.front();
+		q.pop();
+		int i=node.x,j=node.y,dist=node.dist;
+		if (i==x && j==y)
+		{
+			mini=dist;
+			break;
+		}
+		for (int k=0;k<4;k++)
+		{
+		    if (isValid(mat,visited,i+row[k],j+col[k],n,m))
+			{
+			    visited[i+row[k]][j+col[k]]= true;
+				q.push({i+row[k],j+col[k],dist+1});
+			}
+		}
+	}
+	for(int a=0;a<n;a++)
+        delete[] visited[a];
+    delete[] visited;
+	return mini;
+}
+void BFS(int **mat,int i,int j,int x,int y,int n,int m)
+{
+	bool **visited;
+	visited=new bool*[n];
+	for(int a=0;a<n;a++)
+        visited[a]=new bool[m];
+    for(int a=0;a<n;a++)
+    {
+        for(int b=0;b<m;b++)
+            visited[a][b]=false;
+    }
+    int index=0;
+	queue<Node> q;
+	visited[i][j]=true;
+	q.push({i,j,0});
+	while (!q.empty())
+	{
+		Node node = q.front();
+		q.pop();
+		int i = node.x, j = node.y, dist = node.dist;
+		arr[0][index]=i;
+		arr[1][index]=j;
+		dis[index]=dist;
+		index++;
+		if (i==x && j==y) break;
+        for (int k=0;k<4;k++)
+		{
+			if (isValid(mat,visited,i+row[k],j+col[k],n,m))
+			{
+				visited[i+row[k]][j+col[k]] = true;
+				q.push({i+row[k],j+col[k],dist+1});
+			}
+		}
+	}
+	int sol=0;
+	for(int k=1;k<index;k++)
+    {
+        if(dis[k]!=dis[k-1] && dis[k]!=dis[k+1])
+        {
+            solution[0][sol]=arr[0][k];
+            solution[1][sol]=arr[1][k];
+            sol++;
+            continue;
+        }
+        else if(dis[k]!=dis[k+1]) sol++;
+        for(int l=k+1;l<index;l++)
+        {
+            if(dis[k]==dis[l])
+            {
+                if(BFS1((int**)mat,arr[0][k],arr[1][k],x,y,n,m)<BFS1((int**)mat,arr[0][l],arr[1][l],x,y,n,m))
+                {
+                    solution[0][sol]=arr[0][k];
+                    solution[1][sol]=arr[1][k];
+                }
+                else
+                {
+                    solution[0][sol]=arr[0][l];
+                    solution[1][sol]=arr[1][l];
+                }
+            }
+            else break;
+        }
+    }
+    for(int k=0;k<sol;k++)
+    {
+        int l=solution[0][k];
+        int r=solution[1][k];
+        mat[l][r]=2;
+    }
+    for(int a=0;a<n;a++)
+        delete[] visited[a];
+    delete[] visited;
+}
+int main(int argc,char *argv[])
+{
+    string str="argv[1]";
+    string str1="/floor.data";
+    string str2="/final.path";
+    string in,out;
+    in.append(str);
+    in.append(str1);
+    out.append(str);
+    out.append(str2);
+    ifstream infile;
+    ofstream outfile(out.c_str());
+    infile.open(in.c_str());
     int n,m,battery;
-    int p_row,p_col,dust=0,step=0,en=0,cen=0,pen=0,index=0;
-    char x='*',y='-',z='P';
-    cin>>n>>m>>battery;
+    int p_row,p_col,dust=0,step=0,en=0;
+    int **mat;
+    char x='*',y='-';
+    infile>>n>>m>>battery;
     int elec=battery;
+    mat=new int*[n+2];
+    for(int i=0;i<=n+2;i++)
+        mat[i]=new int[m+2];
     for(int i=0;i<=n+1;i++)
     {
         for(int j=0;j<=m+1;j++)
+        {
             room[i][j]='1';
+            mat[i][j]=1;
+        }
     }
     for(int i=1;i<=n;i++)
     {
         for(int j=1;j<=m;j++)
         {
-            cin>>room[i][j];
+            infile>>room[i][j];
+            mat[i][j]=room[i][j]-48;
             if(room[i][j]=='R')
             {
+                mat[i][j]=0;
                 p_row=i;
                 p_col=j;
             }
             else if(room[i][j]=='0')
+            {
+                pos_x[dust]=i;
+                pos_y[dust]=j;
                 dust++;
+            }
         }
     }
-    int dir=left,mem=0;
+    int total=dust;
+    int dir=left;
     int i=p_row,j=p_col;
     while(dust!=0)
     {
-        if(elec!=battery/2 && !en && !cen)
+        if(elec!=battery/2 && !en)
         {
             switch(dir)
             {
@@ -48,21 +204,29 @@ int main()
                     {
                         --dust;
                         room[i][--j]=x;
+                        step_x[step]=j-1;
+                        step_y[step]=i-1;
+                        step++;
                         elec--;
-                        row[index]=i;
-                        column[index]=j;
-                        index++;
+                        for(int k=0;k<total;k++)
+                        {
+                            if(pos_x[k]==i && pos_y[k]==j)
+                            {
+                                pos_x[k]=-1;
+                                pos_y[k]=-1;
+                            }
+                        }
                     }
-                    else if((room[i-1][j]!='0' && room[i][j-1]=='1') || (room[i-1][j]=='1' && room[i][j-1]) || (room[i][j-1]!='0' && room[i+1][j]=='0')) dir=down;
+                    else if((room[i-1][j]!='0' && room[i][j-1]=='1') || (room[i-1][j]=='1' && room[i][j-1]=='1') || (room[i][j-1]!='0' && room[i+1][j]=='0')) dir=down;
                     else if(room[i][j-1]=='1' || (room[i][j-1]=='1' && room[i+1][j]=='1') || (room[i][j-1]!='0' && room[i-1][j]=='0') || room[i][j-1]=='R') dir=up;
                     else if((room[i-1][j]=='1' && room[i][j-1]=='1' && room[i+1][j]=='1') || (room[i][j-1]!='0' && room[i][j+1]=='0')) dir=right;
                     else
                     {
                         room[i][--j]=x;
+                        step_x[step]=j-1;
+                        step_y[step]=i-1;
+                        step++;
                         elec--;
-                        row[index]=i;
-                        column[index]=j;
-                        index++;
                     }
                     break;
                 }
@@ -74,21 +238,29 @@ int main()
                     {
                         --dust;
                         room[--i][j]=x;
+                        step_x[step]=j-1;
+                        step_y[step]=i-1;
+                        step++;
                         elec--;
-                        row[index]=i;
-                        column[index]=j;
-                        index++;
+                        for(int k=0;k<total;k++)
+                        {
+                            if(pos_x[k]==i && pos_y[k]==j)
+                            {
+                                pos_x[k]=-1;
+                                pos_y[k]=-1;
+                            }
+                        }
                     }
                     else if((room[i-1][j]=='1' && room[i][j+1]=='1') || (room[i-1][j]!='0' && room[i][j-1]=='0')) dir=left;
-                    else if(room[i-1][j]=='1' || (room[i-1][j]=='1' && room[i][j-1]=='1') || (room[i-1][j]!='0' && room[i][j+1]=='0') || room[i-1][j]=='R') dir=right;
                     else if((room[i-1][j]=='1' && room[i][j+1]=='1' && room[i][j-1]=='1') || (room[i-1][j]!='0' && room[i+1][j]=='0')) dir=down;
+                    else if(room[i-1][j]=='1' || (room[i-1][j]=='1' && room[i][j-1]=='1') || (room[i-1][j]!='0' && room[i][j+1]=='0') || room[i-1][j]=='R') dir=right;
                     else
                     {
                         room[--i][j]=x;
+                        step_x[step]=j-1;
+                        step_y[step]=i-1;
+                        step++;
                         elec--;
-                        row[index]=i;
-                        column[index]=j;
-                        index++;
                     }
                     break;
                 }
@@ -100,21 +272,29 @@ int main()
                     {
                         --dust;
                         room[i][++j]=x;
+                        step_x[step]=j-1;
+                        step_y[step]=i-1;
+                        step++;
                         elec--;
-                        row[index]=i;
-                        column[index]=j;
-                        index++;
+                        for(int k=0;k<total;k++)
+                        {
+                            if(pos_x[k]==i && pos_y[k]==j)
+                            {
+                                pos_x[k]=-1;
+                                pos_y[k]=-1;
+                            }
+                        }
                     }
                     else if((room[i][j+1]=='1' && room[i+1][j]=='1') || (room[i][j+1]!='0' && room[i-1][j]=='0')) dir=up;
-                    else if(room[i][j+1]=='1' || (room[i][j+1]=='1' && room[i-1][j]=='1') || (room[i][j+1]!='0' && room[i+1][j]=='0') || room[i][j+1]=='R') dir=down;
                     else if((room[i][j+1]=='1' && room[i+1][j]=='1' && room[i-1][j]=='1') || (room[i][j+1]!='0' && room[i][j-1]=='0')) dir=left;
+                    else if(room[i][j+1]=='1' || (room[i][j+1]=='1' && room[i-1][j]=='1') || (room[i][j+1]!='0' && room[i+1][j]=='0') || room[i][j+1]=='R') dir=down;
                     else
                     {
                         room[i][++j]=x;
+                        step_x[step]=j-1;
+                        step_y[step]=i-1;
+                        step++;
                         elec--;
-                        row[index]=i;
-                        column[index]=j;
-                        index++;
                     }
                     break;
                 }
@@ -126,21 +306,29 @@ int main()
                     {
                         --dust;
                         room[++i][j]=x;
+                        step_x[step]=j-1;
+                        step_y[step]=i-1;
+                        step++;
                         elec--;
-                        row[index]=i;
-                        column[index]=j;
-                        index++;
+                        for(int k=0;k<total;k++)
+                        {
+                            if(pos_x[k]==i && pos_y[k]==j)
+                            {
+                                pos_x[k]=-1;
+                                pos_y[k]=-1;
+                            }
+                        }
                     }
                     else if((room[i+1][j]=='1' && room[i][j-1]=='1') || (room[i+1][j]!='0' && room[i][j+1]=='0')) dir=right;
-                    else if(room[i+1][j]=='1' || (room[i+1][j]=='1' && room[i][j+1]=='1') || (room[i+1][j]!='0' && room[i][j-1]=='0') || room[i+1][j]=='R') dir=left;
                     else if((room[i+1][j]=='1' && room[i][j-1]=='1' && room[i][j+1]=='1') || (room[i+1][j]!='0' && room[i-1][j]=='0')) dir=up;
+                    else if(room[i+1][j]=='1' || (room[i+1][j]=='1' && room[i][j+1]=='1') || (room[i+1][j]!='0' && room[i][j-1]=='0') || room[i+1][j]=='R') dir=left;
                     else
                     {
                         room[++i][j]=x;
+                        step_x[step]=j-1;
+                        step_y[step]=i-1;
+                        step++;
                         elec--;
-                        row[index]=i;
-                        column[index]=j;
-                        index++;
                     }
                     break;
                 }
@@ -148,595 +336,373 @@ int main()
         }
         else
         {
-            if(elec==battery/2)
+            BFS((int**)mat,i,j,p_row,p_col,n,m);
+            while((i!=p_row || j!=p_col) && elec!=0)
             {
-                mem=dir;
-                switch(dir)
-                {
-                    case left:
-                    {
-                        if(room[i+1][j]=='R') dir=down;
-                        else if(room[i-1][j]=='R') dir=up;
-                        else dir=right;
-                        break;
-                    }
-                    case up:
-                    {
-                        if(room[i][j+1]=='R') dir=right;
-                        else if(room[i][j-1]=='R') dir=left;
-                        else dir=down;
-                        break;
-                    }
-                    case right:
-                    {
-                        if(room[i+1][j]=='R') dir=down;
-                        else if(room[i-1][j]=='R') dir=up;
-                        else dir=left;
-                        break;
-                    }
-                    case down:
-                    {
-                        if(room[i][j+1]=='R') dir=right;
-                        else if(room[i][j-1]=='R') dir=left;
-                        else dir=up;
-                        break;
-                    }
-                }
-            }
-            if(step==0) cen=0;
-            if((i!=p_row || j!=p_col) && elec!=0)
-            {
-                en=1,cen=1;
+                mat[i][j]=0;
+                room[p_row][p_col]='R';
                 switch(dir)
                 {
                 case left:
                     {
-                        if(room[i+1][j]=='1' && room[i-1][j]=='1' && room[i][j-1]!='1')
+                        if(mat[i][j-1]==2)
                         {
+                            room[i][j]=y;
+                            if(room[i][j-1]=='0')
+                            {
+                                for(int k=0;k<total;k++)
+                                {
+                                    if(pos_x[k]==i && pos_y[k]==j-1)
+                                    {
+                                        pos_x[k]=-1;
+                                        pos_y[k]=-1;
+                                    }
+                                }
+                                --dust;
+                            }
                             room[i][--j]=x;
-                            room[i][j+1]=z;
-                            elec--;
+                            step_x[step]=j-1;
+                            step_y[step]=i-1;
                             step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i+1][j]!='1') dir=down;
-                            else if(room[i-1][j]!='1') dir=up;
-                        }
-                        else if(room[i+1][j]=='1' && room[i][j-1]!='1')
-                        {
-                            room[i][--j]=x;
-                            room[i][j+1]=z;
+                            mat[i][j]=0;
                             elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i+1][j]!='1') dir=down;
                         }
-                        else if(room[i-1][j]=='1' && room[i][j-1]!='1')
-                        {
-                            room[i][--j]=x;
-                            room[i][j+1]=z;
-                            elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i-1][j]!='1') dir=up;
-                        }
-                        else if(room[i+1][j]!='1' && room[i-1][j]!='1' && room[i][j-1]!='1')
-                        {
-                            room[i][--j]=x;
-                            room[i][j+1]=z;
-                            elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                        }
-                        if(room[i][j-1]=='1' || room[i-1][j]==z || room[i+1][j]=='R') dir=down;
-                        if((room[i][j-1]=='1' && room[i+1][j]=='1') || room[i-1][j]=='R') dir=up;
-                        if(room[i][j-1]=='R' || room[i][j+1]=='R' || room[i-1][j]=='R' || room[i+1][j]=='R') pen=1;
+                        else if(mat[i+1][j]==2) dir=down;
+                        else if(mat[i-1][j]==2) dir=up;
+                        else if(mat[i][j+1]==2) dir=right;
                         break;
                     }
                 case up:
                     {
-                        if(room[i][j+1]=='1' && room[i][j-1]=='1' && room[i-1][j]!='1')
+                        if(mat[i-1][j]==2)
                         {
+                            room[i][j]=y;
+                            if(room[i-1][j]=='0')
+                            {
+                                for(int k=0;k<total;k++)
+                                {
+                                    if(pos_x[k]==i-1 && pos_y[k]==j)
+                                    {
+                                        pos_x[k]=-1;
+                                        pos_y[k]=-1;
+                                    }
+                                }
+                                --dust;
+                            }
                             room[--i][j]=x;
-                            room[i+1][j]=z;
-                            elec--;
+                            step_x[step]=j-1;
+                            step_y[step]=i-1;
                             step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i][j+1]!='1') dir=right;
-                            else if(room[i][j-1]!='1') dir=left;
-                        }
-                        else if(room[i][j+1]=='1' && room[i-1][j]!='1')
-                        {
-                            room[--i][j]=x;
-                            room[i+1][j]=z;
+                            mat[i][j]=0;
                             elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i][j+1]!='1') dir=right;
                         }
-                        else if(room[i][j-1]=='1' && room[i-1][j]!='1')
-                        {
-                            room[--i][j]=x;
-                            room[i+1][j]=z;
-                            elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i][j-1]!='1') dir=left;
-                        }
-                        else if(room[i-1][j]!='1' && room[i][j+1]!='1' && room[i][j-1]!='1')
-                        {
-                            room[--i][j]=x;
-                            room[i+1][j]=z;
-                            elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                        }
-                        if(room[i-1][j]=='1' || room[i][j-1]=='R') dir=left;
-                        if((room[i-1][j]=='1' && room[i][j-1]=='1') || room[i][j+1]=='R') dir=right;
-                        if(room[i][j-1]=='R' || room[i][j+1]=='R') pen=1;
+                        else if(mat[i][j+1]==2) dir=right;
+                        else if(mat[i][j-1]==2) dir=left;
+                        else if(mat[i+1][j]==2) dir=down;
                         break;
                     }
                 case right:
                     {
-                        if(room[i+1][j]=='1' && room[i-1][j]=='1' && room[i][j+1]!='1')
+                        if(mat[i][j+1]==2)
                         {
+                            room[i][j]=y;
+                            if(room[i][j+1]=='0')
+                            {
+                                for(int k=0;k<total;k++)
+                                {
+                                    if(pos_x[k]==i && pos_y[k]==j+1)
+                                    {
+                                        pos_x[k]=-1;
+                                        pos_y[k]=-1;
+                                    }
+                                }
+                                --dust;
+                            }
                             room[i][++j]=x;
-                            room[i][j-1]=z;
-                            elec--;
+                            step_x[step]=j-1;
+                            step_y[step]=i-1;
                             step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i+1][j]!='1')dir=down;
-                            else if(room[i-1][j]!='1') dir=up;
-                        }
-                        else if(room[i+1][j]=='1' && room[i][j+1]!='1')
-                        {
-                            room[i][++j]=x;
-                            room[i][j-1]=z;
+                            mat[i][j]=0;
                             elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i+1][j]!='1')dir=down;
                         }
-                        else if(room[i-1][j]=='1'&& room[i][j+1]!='1')
-                        {
-                            room[i][++j]=x;
-                            room[i][j-1]=z;
-                            elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i-1][j]!='1')dir=up;
-                        }
-                        else if(room[i+1][j]!='1' && room[i][j+1]!='1' && room[i-1][j]!='1')
-                        {
-                            room[i][++j]=x;
-                            room[i][j-1]=z;
-                            elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                        }
-                        if(room[i][j+1]=='1' || room[i-1][j]=='R') dir=up;
-                        if((room[i][j+1]=='1' && room[i-1][j]=='1') || room[i+1][j]=='R' || room[i-1][j]==z) dir=down;
-                        if(room[i][j-1]=='R' || room[i][j+1]=='R' || room[i-1][j]=='R' || room[i+1][j]=='R') pen=1;
+                        else if(mat[i+1][j]==2) dir=down;
+                        else if(mat[i-1][j]==2) dir=up;
+                        else if(mat[i][j-1]==2) dir=left;
                         break;
                     }
                 case down:
                     {
-                        if(room[i][j+1]=='1' && room[i][j-1]=='1' && room[i+1][j]!='1')
+                        if(mat[i+1][j]==2)
                         {
+                            room[i][j]=y;
+                            if(room[i+1][j]=='0')
+                            {
+                                for(int k=0;k<total;k++)
+                                {
+                                    if(pos_x[k]==i+1 && pos_y[k]==j)
+                                    {
+                                        pos_x[k]=-1;
+                                        pos_y[k]=-1;
+                                    }
+                                }
+                                --dust;
+                            }
                             room[++i][j]=x;
-                            room[i-1][j]=z;
-                            elec--;
+                            step_x[step]=j-1;
+                            step_y[step]=i-1;
                             step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i][j+1]!='1')dir=right;
-                            else if(room[i][j-1]!='1') dir=left;
-                        }
-                        if(room[i][j+1]=='1' && room[i+1][j]!='1')
-                        {
-                            room[++i][j]=x;
-                            room[i-1][j]=z;
+                            mat[i][j]=0;
                             elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i][j+1]!='1')dir=right;
                         }
-                        else if(room[i][j-1]=='1' && room[i+1][j]!='1')
-                        {
-                            room[++i][j]=x;
-                            room[i-1][j]=z;
-                            elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                            if(room[i][j-1]!='1')dir=left;
-                        }
-                        else if(room[i+1][j]!='1' && room[i][j+1]!='1' && room[i][j-1]!='1')
-                        {
-                            room[++i][j]=x;
-                            room[i-1][j]=z;
-                            elec--;
-                            step++;
-                            row[index]=i;
-                            column[index]=j;
-                            index++;
-                        }
-                        if(room[i+1][j]=='1' || room[i][j+1]=='R') dir=right;
-                        if((room[i][j+1]=='1' && room[i+1][j]=='1') || room[i][j-1]=='R') dir=left;
-                        if(room[i][j-1]=='R' || room[i][j+1]=='R' || room[i-1][j]=='R' || room[i+1][j]=='R') pen=1;
+                        else if(mat[i][j+1]==2) dir=right;
+                        else if(mat[i][j-1]==2) dir=left;
+                        else if(mat[i-1][j]==2) dir=up;
                         break;
                     }
                 }
             }
-            else if(pen)
+            mat[i][j]=0;
+            elec=battery;
+            int ans_x=0,ans_y=0;
+            for(int k=0;k<total;k++)
             {
-                en=0;
-                elec=battery;
-                dir=left;
-                while(step)
+                if(pos_x[k]==-1 && pos_y[k]==-1) continue;
+                else
                 {
-                    switch(dir)
+                    for(int l=k+1;l<total;l++)
                     {
-                    case left:
+                        if(pos_x[l]==-1 && pos_y[l]==-1) continue;
+                        else
                         {
-                            if(room[i][j-1]!=z)
+                            if(BFS1((int **)mat,p_row,p_col,pos_x[k],pos_y[k],n,m)<BFS1((int **)mat,p_row,p_col,pos_x[l],pos_y[l],n,m))
                             {
-                                if(room[i][j+1]==z) dir=right;
-                                else if(room[i+1][j]==z) dir=down;
-                                else if(room[i-1][j]==z) dir=up;
+                                ans_x=pos_x[k];
+                                ans_y=pos_y[k];
                             }
-                            else if(room[i][j-1]==z)
+                            else
                             {
-                                room[i][--j]=x;
-                                room[p_row][p_col]='R';
-                                room[i][j+1]=y;
-                                elec--;
-                                step--;
-                                row[index]=i;
-                                column[index]=j;
-                                index++;
+                                ans_x=pos_x[l];
+                                ans_y=pos_y[l];
                             }
-                            break;
-                        }
-                    case up:
-                        {
-                            if(room[i-1][j]!=z)
-                            {
-                                if(room[i][j+1]==z) dir=right;
-                                else if(room[i+1][j]==z) dir=down;
-                                else if(room[i][j-1]==z) dir=left;
-                            }
-                            else if(room[i-1][j]==z)
-                            {
-                                room[--i][j]=x;
-                                room[p_row][p_col]='R';
-                                room[i+1][j]=y;
-                                elec--;
-                                step--;
-                                row[index]=i;
-                                column[index]=j;
-                                index++;
-                            }
-                            break;
-                        }
-                    case right:
-                        {
-                            if(room[i][j+1]!=z)
-                            {
-                                if(room[i-1][j]==z) dir=up;
-                                else if(room[i+1][j]==z) dir=down;
-                                else if(room[i][j-1]==z) dir=left;
-                            }
-                            else if(room[i][j+1]==z)
-                            {
-                                room[i][++j]=x;
-                                room[p_row][p_col]='R';
-                                room[i][j-1]=y;
-                                elec--;
-                                step--;
-                                row[index]=i;
-                                column[index]=j;
-                                index++;
-                            }
-                            break;
-                        }
-                    case down:
-                        {
-                            if(room[i+1][j]!=z)
-                            {
-                                if(room[i-1][j]==z) dir=up;
-                                else if(room[i][j+1]==z) dir=right;
-                                else if(room[i][j-1]==z) dir=left;
-                            }
-                            else if(room[i+1][j]==z)
-                            {
-                                room[++i][j]=x;
-                                room[p_row][p_col]='R';
-                                room[i-1][j]=y;
-                                elec--;
-                                step--;
-                                row[index]=i;
-                                column[index]=j;
-                                index++;
-                            }
-                            break;
                         }
                     }
-                    if(room[i][j-1]=='0')
+                }
+            }
+            BFS(mat,p_row,p_col,ans_x,ans_y,n,m);
+            while((i!=ans_x || j!=ans_y) && elec!=0)
+            {
+                mat[i][j]=0;
+                room[p_row][p_col]='R';
+                switch(dir)
+                {
+                case left:
                     {
-                        cen=0,pen=0;
-                        dir=left;
+                        if(mat[i][j-1]==2)
+                        {
+                            room[i][j]=y;
+                            if(room[i][j-1]=='0')
+                            {
+                                for(int k=0;k<total;k++)
+                                {
+                                    if(pos_x[k]==i && pos_y[k]==j-1)
+                                    {
+                                        pos_x[k]=-1;
+                                        pos_y[k]=-1;
+                                    }
+                                }
+                                --dust;
+                            }
+                            room[i][--j]=x;
+                            step_x[step]=j-1;
+                            step_y[step]=i-1;
+                            step++;
+                            mat[i][j]=0;
+                            elec--;
+                        }
+                        else if(mat[i+1][j]==2) dir=down;
+                        else if(mat[i-1][j]==2) dir=up;
+                        else if(mat[i][j+1]==2) dir=right;
                         break;
                     }
-                    if(room[i+1][j]=='0')
+                case up:
                     {
-                        cen=0,pen=0;
-                        dir=down;
+                        if(mat[i-1][j]==2)
+                        {
+                            room[i][j]=y;
+                            if(room[i-1][j]=='0')
+                            {
+                                for(int k=0;k<total;k++)
+                                {
+                                    if(pos_x[k]==i-1 && pos_y[k]==j)
+                                    {
+                                        pos_x[k]=-1;
+                                        pos_y[k]=-1;
+                                    }
+                                }
+                                --dust;
+                            }
+                            room[--i][j]=x;
+                            step_x[step]=j-1;
+                            step_y[step]=i-1;
+                            step++;
+                            mat[i][j]=0;
+                            elec--;
+                        }
+                        else if(mat[i][j+1]==2) dir=right;
+                        else if(mat[i][j-1]==2) dir=left;
+                        else if(mat[i+1][j]==2) dir=down;
                         break;
                     }
-                    if(room[i-1][j]=='0')
+                case right:
                     {
-                        cen=0,pen=0;
-                        dir=up;
+                        if(mat[i][j+1]==2)
+                        {
+                            room[i][j]=y;
+                            if(room[i][j+1]=='0')
+                            {
+                                for(int k=0;k<total;k++)
+                                {
+                                    if(pos_x[k]==i && pos_y[k]==j+1)
+                                    {
+                                        pos_x[k]=-1;
+                                        pos_y[k]=-1;
+                                    }
+                                }
+                                --dust;
+                            }
+                            room[i][++j]=x;
+                            step_x[step]=j-1;
+                            step_y[step]=i-1;
+                            step++;
+                            mat[i][j]=0;
+                            elec--;
+                        }
+                        else if(mat[i+1][j]==2) dir=down;
+                        else if(mat[i-1][j]==2) dir=up;
+                        else if(mat[i][j-1]==2) dir=left;
                         break;
                     }
-                    if(room[i][j+1]=='0')
+                case down:
                     {
-                        cen=0,pen=0;
-                        dir=right;
+                        if(mat[i+1][j]==2)
+                        {
+                            room[i][j]=y;
+                            if(room[i+1][j]=='0')
+                            {
+                                for(int k=0;k<total;k++)
+                                {
+                                    if(pos_x[k]==i+1 && pos_y[k]==j)
+                                    {
+                                        pos_x[k]=-1;
+                                        pos_y[k]=-1;
+                                    }
+                                }
+                                --dust;
+                            }
+                            room[++i][j]=x;
+                            step_x[step]=j-1;
+                            step_y[step]=i-1;
+                            step++;
+                            mat[i][j]=0;
+                            elec--;
+                        }
+                        else if(mat[i][j+1]==2) dir=right;
+                        else if(mat[i][j-1]==2) dir=left;
+                        else if(mat[i-1][j]==2) dir=up;
                         break;
                     }
                 }
-                cen=0,pen=0;
-                dir=mem;
             }
+            en=0;
         }
     }
+    BFS(mat,i,j,p_row,p_col,n,m);
     while((i!=p_row || j!=p_col) && elec!=0)
     {
+        mat[i][j]=0;
+        room[p_row][p_col]='R';
         switch(dir)
         {
-            case left:
+        case left:
             {
-                if(room[i+1][j]=='1' && room[i-1][j]=='1' && room[i][j-1]!='1')
+                if(mat[i][j-1]==2)
                 {
+                    room[i][j]=y;
                     room[i][--j]=x;
+                    step_x[step]=j-1;
+                    step_y[step]=i-1;
+                    step++;
+                    mat[i][j]=0;
                     elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i+1][j]!='1') dir=down;
-                    else if(room[i-1][j]!='1') dir=up;
                 }
-                else if(room[i+1][j]=='1' && room[i][j-1]!='1')
-                {
-                    room[i][--j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i+1][j]!='1') dir=down;
-                }
-                else if(room[i-1][j]=='1' && room[i][j-1]!='1')
-                {
-                    room[i][--j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i-1][j]!='1') dir=up;
-                }
-                else if(room[i+1][j]!='1' && room[i-1][j]!='1' && room[i][j-1]!='1')
-                {
-                    room[i][--j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                }
-                if((room[i+1][j]==x && room[i-1][j]!=x) || room[i][j-1]=='1' || room[i-1][j]=='R') dir=up;
-                if((room[i+1][j]!=x && room[i-1][j]==x) || (room[i][j-1]=='1' && room[i-1][j]=='1') ||  room[i+1][j]=='R') dir=down;
-                if(room[i-1][j]=='R' || room[i+1][j]=='R') pen=1;
+                else if(mat[i+1][j]==2) dir=down;
+                else if(mat[i-1][j]==2) dir=up;
+                else if(mat[i][j+1]==2) dir=right;
                 break;
             }
-            case up:
+        case up:
             {
-                if(room[i][j+1]=='1' && room[i][j-1]=='1' && room[i-1][j]!='1')
+                if(mat[i-1][j]==2)
                 {
+                    room[i][j]=y;
                     room[--i][j]=x;
+                    step_x[step]=j-1;
+                    step_y[step]=i-1;
+                    step++;
+                    mat[i][j]=0;
                     elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i][j+1]!='1') dir=right;
-                    else if(room[i][j-1]!='1') dir=left;
                 }
-                else if(room[i][j+1]=='1' && room[i-1][j]!='1')
-                {
-                    room[--i][j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i][j+1]!='1') dir=right;
-                }
-                else if(room[i][j-1]=='1' && room[i-1][j]!='1')
-                {
-                    room[--i][j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i][j-1]!='1') dir=left;
-                }
-                else if(room[i-1][j]!='1' && room[i][j+1]!='1' && room[i][j-1]!='1')
-                {
-                    room[--i][j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                }
-                if((room[i][j-1]==x && room[i][j+1]!=x) || room[i-1][j]=='1' || room[i][j+1]=='R') dir=right;
-                if((room[i][j-1]!=x && room[i][j+1]==x) || (room[i-1][j]=='1' && room[i][j+1]=='1') || room[i][j-1]=='R') dir=left;
-                if(room[i][j-1]=='R' || room[i][j+1]=='R') pen=1;
+                else if(mat[i][j+1]==2) dir=right;
+                else if(mat[i][j-1]==2) dir=left;
+                else if(mat[i+1][j]==2) dir=down;
                 break;
             }
-            case right:
+        case right:
             {
-                if(room[i+1][j]=='1' && room[i-1][j]=='1' && room[i][j+1]!='1')
+                if(mat[i][j+1]==2)
                 {
+                    room[i][j]=y;
                     room[i][++j]=x;
+                    step_x[step]=j-1;
+                    step_y[step]=i-1;
+                    step++;
+                    mat[i][j]=0;
                     elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i+1][j]!='1')dir=down;
-                    else if(room[i-1][j]!='1') dir=up;
                 }
-                else if(room[i+1][j]=='1' && room[i][j+1]!='1')
-                {
-                    room[i][++j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i+1][j]!='1')dir=down;
-                }
-                else if(room[i-1][j]=='1'&& room[i][j+1]!='1')
-                {
-                    room[i][++j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i-1][j]!='1')dir=up;
-                }
-                else if(room[i+1][j]!='1' && room[i][j+1]!='1' && room[i-1][j]!='1')
-                {
-                    room[i][++j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                }
-                if((room[i+1][j]!=x && room[i-1][j]==x) || room[i][j+1]=='1' || room[i+1][j]=='R') dir=down;
-                if((room[i+1][j]==x && room[i-1][j]!=x) || (room[i][j+1]=='1' && room[i+1][j]=='1') || room[i-1][j]=='R') dir=up;
-                if(room[i-1][j]=='R' || room[i+1][j]=='R') pen=1;
+                else if(mat[i+1][j]==2) dir=down;
+                else if(mat[i-1][j]==2) dir=up;
+                else if(mat[i][j-1]==2) dir=left;
                 break;
             }
-            case down:
+        case down:
             {
-                if(room[i][j+1]=='1' && room[i][j-1]=='1' && room[i+1][j]!='1')
+                if(mat[i+1][j]==2)
                 {
+                    room[i][j]=y;
                     room[++i][j]=x;
+                    step_x[step]=j-1;
+                    step_y[step]=i-1;
+                    step++;
+                    mat[i][j]=0;
                     elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i][j+1]!='1')dir=right;
-                    else if(room[i][j-1]!='1') dir=left;
                 }
-                if(room[i][j+1]=='1' && room[i+1][j]!='1')
-                {
-                    room[++i][j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i][j+1]!='1')dir=right;
-                }
-                else if(room[i][j-1]=='1' && room[i+1][j]!='1')
-                {
-                    room[++i][j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                    if(room[i][j-1]!='1')dir=left;
-                }
-                else if(room[i+1][j]!='1' && room[i][j+1]!='1' && room[i][j-1]!='1')
-                {
-                    room[++i][j]=x;
-                    elec--;
-                    row[index]=i;
-                    column[index]=j;
-                    index++;
-                }
-                if((room[i][j-1]!=x && room[i][j+1]==x) || room[i+1][j]=='1' || room[i][j-1]=='R') dir=left;
-                if((room[i][j-1]==x && room[i][j+1]!=x) || (room[i+1][j]=='1' && room[i][j-1]=='1') || room[i][j+1]=='R') dir=right;
-                if(room[i][j-1]=='R' || room[i][j+1]=='R') pen=1;
+                else if(mat[i][j+1]==2) dir=right;
+                else if(mat[i][j-1]==2) dir=left;
+                else if(mat[i-1][j]==2) dir=up;
                 break;
             }
         }
     }
-    cout<<index+1<<endl;
-    for(int k=0;k<index;k++)
-        cout<<row[k]<<" "<<column[k]<<endl;
+    for(int a=0;a<=n+2;a++)
+        delete[] mat[a];
+    delete[] mat;
+    infile.close();
+    outfile<<step<<endl;
+    for(int i=0;i<step;i++)
+    {
+        outfile<<step_y[i]<<" "<<step_x[i]<<endl;
+    }
+    outfile.close();
     return 0;
 }
-
-/*
-Main Question: How to detect shortcut to R?
-N*M  Energy
-7*11 30
-lost_energy++ when step++
-if(lost_energy==energy/2) *go back to sleep(R)*
-come back road - -> +
-detect R
-
-eating_priority: left > up > right > down
-if(room[i][j-1]==0 room[i-1][j]==0 room[i][j+1]==0 room[i+1][j]==0) *eat* 0 -> -
-if(all direction!=0) go back last step
-
-rules:
-1:wall
-0:food
--:eaten
-R:bed
-*:fat
-
-11111111111
-10001110011
-11001110011
-110011R0011
-11001111011
-10000000011
-11111111111
-
-1111111111
-1000100001
-1000100001
-1000100001
-1011111101
-1000000001
-1111R11111
-*/
-
+                      
